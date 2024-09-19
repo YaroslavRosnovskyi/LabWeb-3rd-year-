@@ -9,6 +9,9 @@ namespace LabWeb.Repositories.Interfaces
         void Delete(TEntity entity);
         void DeleteAll(IEnumerable<TEntity> entities);
         IQueryable<TEntity> GetAll(Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null);
+
+        IQueryable<TEntity> GetAllPaginated(int skip = 0, int limit = 0,
+            Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null);
         Task<TEntity> GetFirstAsync(Expression<Func<TEntity, bool>>? predicate = null, Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null);
         Task<TEntity?> GetFirstOrDefaultAsync(Expression<Func<TEntity, bool>>? predicate = null, Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null);
         IQueryable<TEntity> GetWhere(Expression<Func<TEntity, bool>>? predicate, Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null, bool ignoreDbSet = false);

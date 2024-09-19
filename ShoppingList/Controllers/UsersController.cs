@@ -9,6 +9,7 @@ using LabWeb.Context;
 using LabWeb.DTOs;
 using LabWeb.Models;
 using LabWeb.Services.Interfaces;
+using LabWeb.Services;
 
 namespace LabWeb.Controllers
 {
@@ -24,10 +25,26 @@ namespace LabWeb.Controllers
         }
 
         // GET: api/Users
+        //[HttpGet]
+        //public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
+        //{
+        //    return await _userService.GetAllAsync();
+        //}
+
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
+        public async Task<ActionResult<PaginatedResponse<UserDto>>> GetPaginatedItems([FromQuery] int skip = 0, [FromQuery] int limit = 10)
         {
-            return await _userService.GetAllAsync();
+            var paginatedEntities = await _userService.GetAllPaginatedAsync(skip, limit);
+
+            string? nextLink = String.Empty;
+            if (limit <= paginatedEntities.MappedEntities.Count())
+            {
+                nextLink = Url.Action(nameof(GetPaginatedItems), new { skip = skip + limit, limit });
+            }
+            paginatedEntities.NextLink = nextLink;
+
+
+            return paginatedEntities;
         }
 
         // GET: api/Users/5

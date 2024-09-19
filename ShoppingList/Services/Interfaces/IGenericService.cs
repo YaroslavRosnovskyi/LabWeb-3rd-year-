@@ -10,6 +10,7 @@ namespace LabWeb.Services.Interfaces
         Task DeleteAsync(TMappedEntity entity);
         Task<TMappedEntity?> FindByIdAsync(Guid id);
         Task<List<TMappedEntity>> GetAllAsync();
+        Task<PaginatedResponse<TMappedEntity>> GetAllPaginatedAsync(int skip, int limit);
         Task<TMappedEntity> Insert(TMappedEntity entity);
         Task<TMappedEntity> Update(TMappedEntity entity);
     }

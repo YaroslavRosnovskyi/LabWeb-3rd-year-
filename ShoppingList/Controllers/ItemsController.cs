@@ -24,10 +24,26 @@ namespace LabWeb.Controllers
         }
 
         // GET: api/Items
+        //[HttpGet]
+        //public async Task<ActionResult<IEnumerable<ItemDto>>> GetItems()
+        //{
+        //    return await _itemService.GetAllAsync();
+        //}
+
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ItemDto>>> GetItems()
+        public async Task<ActionResult<PaginatedResponse<ItemDto>>> GetPaginatedItems([FromQuery] int skip = 0, [FromQuery] int limit = 10)
         {
-            return await _itemService.GetAllAsync();
+            var paginatedEntities = await _itemService.GetAllPaginatedAsync(skip, limit);
+
+            string? nextLink = String.Empty;
+            if (limit <= paginatedEntities.MappedEntities.Count())
+            {
+                nextLink = Url.Action(nameof(GetPaginatedItems), new { skip = skip + limit, limit });
+            }
+            paginatedEntities.NextLink = nextLink;
+            
+
+            return paginatedEntities;
         }
 
         // GET: api/Items/5

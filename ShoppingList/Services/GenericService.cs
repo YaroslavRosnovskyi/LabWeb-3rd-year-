@@ -5,6 +5,7 @@ using LabWeb.Repositories.Interfaces;
 using LabWeb.Services.Interfaces;
 using Mapster;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
 using Microsoft.EntityFrameworkCore;
 
 namespace LabWeb.Services
@@ -26,6 +27,22 @@ namespace LabWeb.Services
             var entities = await repository.GetAll().ToListAsync();
             var mappedEntities = entities.Adapt<List<TMappedEntity>>();
             return mappedEntities;
+        }
+
+        public virtual async Task<PaginatedResponse<TMappedEntity>> GetAllPaginatedAsync(int skip, int limit)
+        {
+            var entities = await repository.GetAllPaginated(skip, limit).ToListAsync();
+            var mappedEntities = entities.Adapt<List<TMappedEntity>>();
+
+            var paginatedResponse = new PaginatedResponse<TMappedEntity>
+            {
+                MappedEntities = mappedEntities,
+                TotalCount = mappedEntities.Count,
+                Limit = limit,
+                Skip = skip,
+            };
+
+            return paginatedResponse;
         }
 
         public virtual async Task<TMappedEntity?> FindByIdAsync(Guid id)

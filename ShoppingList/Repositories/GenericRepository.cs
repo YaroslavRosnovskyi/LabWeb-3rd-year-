@@ -87,6 +87,21 @@ public abstract class GenericRepository<TEntity> : IGenericRepository<TEntity> w
         return preparedDbSet;
     }
 
+    public virtual IQueryable<TEntity> GetAllPaginated(int skip, int limit,
+        Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null)
+    {
+        var preparedDbSet = PrepareDbSet();
+
+        if (include != null)
+        {
+            preparedDbSet = include(preparedDbSet);
+        }
+
+        var paginatedPreparedDbSet = preparedDbSet.Skip(skip).Take(limit);
+
+        return paginatedPreparedDbSet;
+    }
+
     public async Task Post(TEntity entity)
     {
         if (entity == null)
