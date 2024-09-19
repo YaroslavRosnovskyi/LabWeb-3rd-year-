@@ -1,0 +1,6 @@
+services:
+  labweb:
+    image: ${DOCKER_REGISTRY-}labweb
+    build:
+      context: ShoppingList
+      dockerfile: Dockerfile
