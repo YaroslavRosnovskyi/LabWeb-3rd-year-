@@ -6,9 +6,9 @@ namespace LabWeb.Models;
 public class ShoppingList : BaseEntity
 {
     [StringLength(50)]
-    public string? Name { get; set; } // Назва списку
+    public string? Name { get; set; }
     [ForeignKey(nameof(User))]
-    public Guid UserId { get; set; } // Ідентифікатор користувача (для зв'язку з User)
-    public User? User { get; set; } // Зв'язок з User
-    public ICollection<Item> Items { get; set; } = new List<Item>(); // Список товарів у цьому списку
+    public Guid UserId { get; set; }
+    public User? User { get; set; }
+    public ICollection<Item> Items { get; set; } = new List<Item>();
 }

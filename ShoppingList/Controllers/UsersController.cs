@@ -14,53 +14,54 @@ namespace LabWeb.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ItemsController : ControllerBase
+    public class UsersController : ControllerBase
     {
-        private readonly IItemService _itemService;
+        private readonly IUserService _userService;
 
-        public ItemsController(IItemService itemService)
+        public UsersController(IUserService userService)
         {
-            _itemService = itemService;
+            _userService = userService;
         }
 
-        // GET: api/Items
+        // GET: api/Users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ItemDto>>> GetItems()
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
         {
-            return await _itemService.GetAllAsync();
+            return await _userService.GetAllAsync();
         }
 
-        // GET: api/Items/5
+        // GET: api/Users/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ItemDto>> GetItem(Guid id)
+        public async Task<ActionResult<UserDto>> GetUser(Guid id)
         {
-            var item = await _itemService.FindByIdAsync(id);
+            var user = await _userService.FindByIdAsync(id);
 
-            if (item == null)
+            if (user == null)
             {
                 return NotFound();
             }
 
-            return item;
+            return user;
         }
 
-        // PUT: api/Items/5
+        // PUT: api/Users/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutItem(Guid id, ItemDto item)
+        public async Task<IActionResult> PutUser(Guid id, UserDto user)
         {
-            if (id != item.Id)
+            if (id != user.Id)
             {
                 return BadRequest();
             }
 
+
             try
             {
-                await _itemService.Update(item);
+                await _userService.Update(user);
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!await ItemExists(id))
+                if (!await UserExists(id))
                 {
                     return NotFound();
                 }
@@ -73,34 +74,34 @@ namespace LabWeb.Controllers
             return NoContent();
         }
 
-        // POST: api/Items
+        // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Item>> PostItem(ItemDto item)
+        public async Task<ActionResult<User>> PostUser(UserDto user)
         {
-            var itemDto = await _itemService.Insert(item);
+            var userDto = await _userService.Insert(user);
 
-            return CreatedAtAction("GetItem", new { id = itemDto.Id }, itemDto);
+            return CreatedAtAction("GetUser", new { id = userDto.Id }, userDto);
         }
 
-        // DELETE: api/Items/5
+        // DELETE: api/Users/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteItem(Guid id)
+        public async Task<IActionResult> DeleteUser(Guid id)
         {
-            var item = await _itemService.FindByIdAsync(id);
-            if (item == null)
+            var user = await _userService.FindByIdAsync(id);
+            if (user == null)
             {
                 return NotFound();
             }
 
-            await  _itemService.DeleteAsync(item);
+            await _userService.DeleteAsync(user);
 
             return NoContent();
         }
 
-        private async Task<bool> ItemExists(Guid id)
+        private async Task<bool> UserExists(Guid id)
         {
-            return await _itemService.FindByIdAsync(id) != null;
+            return await _userService.FindByIdAsync(id) != null;
         }
     }
 }

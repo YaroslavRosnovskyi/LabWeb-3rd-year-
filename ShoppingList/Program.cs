@@ -1,4 +1,9 @@
 using LabWeb.Context;
+using LabWeb.Repositories;
+using LabWeb.Repositories.Interfaces;
+using LabWeb.Services;
+using LabWeb.Services.Interfaces;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +16,16 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("AzureSqlDatabase"));
 });
+
+builder.Services.AddScoped<IItemRepository, ItemRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IShoppingListRepository, ShoppingListRepository>();
+
+builder.Services.AddScoped<IItemService, ItemService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IShoppingListService, ShoppingListService>();
+
+builder.Services.AddMapster();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

@@ -1,13 +1,16 @@
-﻿using LabWeb.Models;
+﻿using LabWeb.DTOs;
+using LabWeb.Models;
 
 namespace LabWeb.Services.Interfaces
 {
-    public interface IGenericService<TEntity> where TEntity : BaseEntity
+    public interface IGenericService<TEntity, TMappedEntity> 
+        where TEntity : BaseEntity
+        where TMappedEntity : BaseDto
     {
-        Task DeleteAsync(TEntity entity);
-        Task<TEntity?> FindByIdAsync(Guid id);
-        Task<List<TEntity>> GetAllAsync();
-        Task<TEntity> Insert(TEntity entity);
-        Task<TEntity> Update(TEntity entity);
+        Task DeleteAsync(TMappedEntity entity);
+        Task<TMappedEntity?> FindByIdAsync(Guid id);
+        Task<List<TMappedEntity>> GetAllAsync();
+        Task<TMappedEntity> Insert(TMappedEntity entity);
+        Task<TMappedEntity> Update(TMappedEntity entity);
     }
 }
