@@ -11,6 +11,8 @@ public class Item : BaseEntity
     public int Quantity { get; set; } 
     [StringLength(200)]
     public string Notes { get; set; } 
+
+
     [ForeignKey(nameof(ShoppingList))]
     public Guid ShoppingListId { get; set; } 
     public ShoppingList? ShoppingList { get; set; }

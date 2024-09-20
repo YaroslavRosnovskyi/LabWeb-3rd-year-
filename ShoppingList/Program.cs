@@ -6,6 +6,7 @@ using LabWeb.Services.Interfaces;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
+using Microsoft.Extensions.Azure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,16 +14,28 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
+
+var connection = builder.Configuration.GetConnectionString("AzureSqlDatabase");
+
+if (builder.Environment.IsDevelopment())
+{
+    connection = builder.Configuration.GetConnectionString("Local");
+}
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("AzureSqlDatabase"));
+    options.UseSqlServer(connection);
 });
+
 
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
 builder.Services.Decorate<IItemRepository, CachedItemRepository>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.Decorate<IUserRepository, CachedUserRepository>();
+
 builder.Services.AddScoped<IShoppingListRepository, ShoppingListRepository>();
+builder.Services.Decorate<IShoppingListRepository, CachedShoppingListRepository>();
 
 builder.Services.AddScoped<IItemService, ItemService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -36,13 +49,20 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.ConfigurationOptions = new ConfigurationOptions
     {
         EndPoints = { "localhost:6379" },
-        ConnectTimeout = 10000,  // 10 seconds
-        SyncTimeout = 10000      // 10 seconds for sync commands
+        ConnectTimeout = 10000,  
+        SyncTimeout = 10000      
     };
 });
 
+builder.Services.AddMemoryCache();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddAzureClients(clientBuilder =>
+{
+    clientBuilder.AddBlobServiceClient(builder.Configuration["AzureStorage:blob"]!, preferMsi: true);
+    clientBuilder.AddQueueServiceClient(builder.Configuration["AzureStorage:queue"]!, preferMsi: true);
+});
 
 
 var app = builder.Build();

@@ -1,25 +1,23 @@
-﻿using System.Linq.Expressions;
-using LabWeb.Models;
-using LabWeb.Repositories.Interfaces;
+﻿using LabWeb.Models;
 using Microsoft.EntityFrameworkCore.Query;
-using Microsoft.Extensions.Caching.Distributed;
+using System.Linq.Expressions;
+using LabWeb.Repositories.Interfaces;
 using Microsoft.Extensions.Caching.Memory;
-using Newtonsoft.Json;
 
 namespace LabWeb.Repositories;
 
-public class CachedItemRepository : IItemRepository
+public class CachedUserRepository : IUserRepository
 {
-    private readonly IItemRepository _decorated;
+    private readonly IUserRepository _decorated;
     private readonly IMemoryCache _memoryCache;
 
-    public CachedItemRepository(IItemRepository decorated, IMemoryCache memoryCache)
+    public CachedUserRepository(IUserRepository decorated, IMemoryCache memoryCache)
     {
         _decorated = decorated;
         _memoryCache = memoryCache;
     }
 
-    public void Delete(Item entity)
+    public void Delete(User entity)
     {
         string key = $"member-{entity.Id}";
 
@@ -28,20 +26,19 @@ public class CachedItemRepository : IItemRepository
         _memoryCache.Remove(key);
     }
 
-
     //not
-    public void DeleteAll(IEnumerable<Item> entities)
+    public void DeleteAll(IEnumerable<User> entities)
     {
-        _decorated.DeleteAll(entities); 
+        _decorated.DeleteAll(entities);
     }
 
     //not
-    public IQueryable<Item> GetAll(Func<IQueryable<Item>, IIncludableQueryable<Item, object>>? include = null)
+    public IQueryable<User> GetAll(Func<IQueryable<User>, IIncludableQueryable<User, object>>? include = null)
     {
         return _decorated.GetAll(include);
     }
 
-    public async Task<IEnumerable<Item>?> GetAllPaginated(int skip, int limit, Func<IQueryable<Item>, IIncludableQueryable<Item, object>>? include = null)
+    public async Task<IEnumerable<User>?> GetAllPaginated(int skip, int limit, Func<IQueryable<User>, IIncludableQueryable<User, object>>? include = null)
     {
         string key = $"member-{skip}-{limit}";
 
@@ -54,17 +51,17 @@ public class CachedItemRepository : IItemRepository
     }
 
     //not
-    public async Task<Item> GetFirstAsync(Expression<Func<Item, bool>>? predicate = null, Func<IQueryable<Item>, IIncludableQueryable<Item, object>>? include = null)
+    public async Task<User> GetFirstAsync(Expression<Func<User, bool>>? predicate = null, Func<IQueryable<User>, IIncludableQueryable<User, object>>? include = null)
     {
         return await _decorated.GetFirstAsync(predicate, include);
     }
 
-    public async Task<Item?> GetFirstOrDefaultAsync(Expression<Func<Item, bool>>? predicate = null, Func<IQueryable<Item>, IIncludableQueryable<Item, object>>? include = null)
+    public async Task<User?> GetFirstOrDefaultAsync(Expression<Func<User, bool>>? predicate = null, Func<IQueryable<User>, IIncludableQueryable<User, object>>? include = null)
     {
         return await _decorated.GetFirstOrDefaultAsync(predicate, include);
     }
 
-    public async Task<Item?> GetByIdAsync(Guid id)
+    public async Task<User?> GetByIdAsync(Guid id)
     {
         string key = $"member-{id}";
 
@@ -78,19 +75,19 @@ public class CachedItemRepository : IItemRepository
 
 
     //not
-    public IQueryable<Item> GetWhere(Expression<Func<Item, bool>>? predicate, Func<IQueryable<Item>, IIncludableQueryable<Item, object>>? include = null, bool ignoreDbSet = false)
+    public IQueryable<User> GetWhere(Expression<Func<User, bool>>? predicate, Func<IQueryable<User>, IIncludableQueryable<User, object>>? include = null, bool ignoreDbSet = false)
     {
         return _decorated.GetWhere(predicate, include, ignoreDbSet);
     }
 
 
     //not
-    public void Patch(Item entity)
+    public void Patch(User entity)
     {
         _decorated.Patch(entity);
     }
 
-    public async Task Post(Item entity)
+    public async Task Post(User entity)
     {
         string key = $"member-{entity.Id}";
 
@@ -104,7 +101,7 @@ public class CachedItemRepository : IItemRepository
         await _decorated.SaveChangesAsync();
     }
 
-    public void Update(Item entity)
+    public void Update(User entity)
     {
         string key = $"member-{entity.Id}";
 
@@ -114,7 +111,7 @@ public class CachedItemRepository : IItemRepository
     }
 
     //not
-    public async Task UpdateMany(Expression<Func<Item, bool>> predicate, Expression<Func<SetPropertyCalls<Item>, SetPropertyCalls<Item>>> setPropertyCalls)
+    public async Task UpdateMany(Expression<Func<User, bool>> predicate, Expression<Func<SetPropertyCalls<User>, SetPropertyCalls<User>>> setPropertyCalls)
     {
         await _decorated.UpdateMany(predicate, setPropertyCalls);
     }

@@ -10,5 +10,6 @@ public class User : BaseEntity
     [EmailAddress]
     public string? Email { get; set; }
     public string? PasswordHash { get; set; }
+    public string? ImageName { get; set; }
     public ICollection<ShoppingList> ShoppingList { get; set; } = new List<ShoppingList>();
 }

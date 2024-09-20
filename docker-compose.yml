@@ -5,7 +5,7 @@ services:
       context: ShoppingList
       dockerfile: Dockerfile
     depends_on:
-      - redis # Ensure labweb waits for redis to be ready
+      - redis 
 
   redis:
     image: "redis:latest"
