@@ -31,7 +31,7 @@ namespace LabWeb.Services
 
         public virtual async Task<PaginatedResponse<TMappedEntity>> GetAllPaginatedAsync(int skip, int limit)
         {
-            var entities = await repository.GetAllPaginated(skip, limit).ToListAsync();
+            var entities = await repository.GetAllPaginated(skip, limit);
             var mappedEntities = entities.Adapt<List<TMappedEntity>>();
 
             var paginatedResponse = new PaginatedResponse<TMappedEntity>
@@ -47,7 +47,7 @@ namespace LabWeb.Services
 
         public virtual async Task<TMappedEntity?> FindByIdAsync(Guid id)
         {
-            var entity = await repository.GetFirstOrDefaultAsync(entity => entity.Id == id);
+            var entity = await repository.GetByIdAsync(id);
             var mappedEntity = entity.Adapt<TMappedEntity>();
             return mappedEntity;
         }

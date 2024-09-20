@@ -7,7 +7,9 @@ using LabWeb.Repositories.Interfaces;
 
 namespace LabWeb.Repositories;
 
-public abstract class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : BaseEntity
+public abstract class GenericRepository<TEntity> 
+    : IGenericRepository<TEntity> 
+    where TEntity : BaseEntity
 {
     private readonly ApplicationDbContext _context;
     protected readonly DbSet<TEntity> dbSet;
@@ -37,6 +39,13 @@ public abstract class GenericRepository<TEntity> : IGenericRepository<TEntity> w
             return await preparedDbSet.FirstOrDefaultAsync();
 
         return await preparedDbSet.FirstOrDefaultAsync(predicate);
+    }
+
+    public async Task<TEntity?> GetByIdAsync(Guid id)
+    {
+        var preparedDbSet = PrepareDbSet();
+
+        return await preparedDbSet.FirstOrDefaultAsync(e => e.Id == id);
     }
 
     public virtual async Task<TEntity> GetFirstAsync(Expression<Func<TEntity, bool>>? predicate = null,
@@ -87,7 +96,7 @@ public abstract class GenericRepository<TEntity> : IGenericRepository<TEntity> w
         return preparedDbSet;
     }
 
-    public virtual IQueryable<TEntity> GetAllPaginated(int skip, int limit,
+    public virtual async Task<IEnumerable<TEntity>> GetAllPaginated(int skip, int limit,
         Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null)
     {
         var preparedDbSet = PrepareDbSet();
@@ -99,7 +108,7 @@ public abstract class GenericRepository<TEntity> : IGenericRepository<TEntity> w
 
         var paginatedPreparedDbSet = preparedDbSet.Skip(skip).Take(limit);
 
-        return paginatedPreparedDbSet;
+        return await paginatedPreparedDbSet.ToListAsync();
     }
 
     public async Task Post(TEntity entity)

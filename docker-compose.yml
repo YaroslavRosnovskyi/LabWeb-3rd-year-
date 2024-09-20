@@ -4,3 +4,15 @@ services:
     build:
       context: ShoppingList
       dockerfile: Dockerfile
+    depends_on:
+      - redis # Ensure labweb waits for redis to be ready
+
+  redis:
+    image: "redis:latest"
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+volumes:
+  redis-data:

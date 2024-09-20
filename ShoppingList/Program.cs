@@ -5,6 +5,7 @@ using LabWeb.Services;
 using LabWeb.Services.Interfaces;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 });
 
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
+builder.Services.Decorate<IItemRepository, CachedItemRepository>();
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IShoppingListRepository, ShoppingListRepository>();
 
@@ -27,8 +30,20 @@ builder.Services.AddScoped<IShoppingListService, ShoppingListService>();
 
 builder.Services.AddMapster();
 
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+    options.ConfigurationOptions = new ConfigurationOptions
+    {
+        EndPoints = { "localhost:6379" },
+        ConnectTimeout = 10000,  // 10 seconds
+        SyncTimeout = 10000      // 10 seconds for sync commands
+    };
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 
 var app = builder.Build();
 
