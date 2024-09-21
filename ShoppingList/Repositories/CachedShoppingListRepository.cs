@@ -40,7 +40,7 @@ public class CachedShoppingListRepository : IShoppingListRepository
 
     public async Task<IEnumerable<ShoppingList>?> GetAllPaginated(int skip, int limit, Func<IQueryable<ShoppingList>, IIncludableQueryable<ShoppingList, object>>? include = null)
     {
-        string key = $"member-{skip}-{limit}";
+        string key = $"member-{skip}-{limit}-list";
 
         return await _memoryCache.GetOrCreateAsync(key, entry =>
         {

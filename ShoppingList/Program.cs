@@ -4,6 +4,7 @@ using LabWeb.Repositories.Interfaces;
 using LabWeb.Services;
 using LabWeb.Services.Interfaces;
 using Mapster;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 using Microsoft.Extensions.Azure;
@@ -41,6 +42,8 @@ builder.Services.AddScoped<IItemService, ItemService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IShoppingListService, ShoppingListService>();
 
+builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
+
 builder.Services.AddMapster();
 
 builder.Services.AddStackExchangeRedisCache(options =>
@@ -60,7 +63,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAzureClients(clientBuilder =>
 {
-    clientBuilder.AddBlobServiceClient(builder.Configuration["AzureStorage:blob"]!, preferMsi: true);
+    clientBuilder.AddBlobServiceClient(builder.Configuration["AzureStorage"]!, preferMsi: true);
     clientBuilder.AddQueueServiceClient(builder.Configuration["AzureStorage:queue"]!, preferMsi: true);
 });
 
@@ -79,6 +82,10 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
+app.UseAuthentication();
+
 app.MapControllers();
+
+app.MapIdentityApi<IdentityUser>();
 
 app.Run();

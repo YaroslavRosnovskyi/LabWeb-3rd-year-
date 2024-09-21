@@ -40,7 +40,7 @@ public class CachedUserRepository : IUserRepository
 
     public async Task<IEnumerable<User>?> GetAllPaginated(int skip, int limit, Func<IQueryable<User>, IIncludableQueryable<User, object>>? include = null)
     {
-        string key = $"member-{skip}-{limit}";
+        string key = $"member-{skip}-{limit}-user";
 
         return await _memoryCache.GetOrCreateAsync(key, entry =>
         {

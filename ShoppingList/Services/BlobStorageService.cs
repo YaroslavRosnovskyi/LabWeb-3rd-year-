@@ -23,7 +23,7 @@ public class BlobStorageService : IBlobStorageService
         var blobName = $"{imageName}{Path.GetExtension(formFile.FileName)}";
         var container = await GetBlobContainerClient();
 
-        if (!string.IsNullOrEmpty(originalBlobName))
+        if (!string.IsNullOrEmpty(originalBlobName) || originalBlobName != "Default.jpg")
         {
             await RemoveBlob(originalBlobName);
         }

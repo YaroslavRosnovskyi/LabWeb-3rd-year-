@@ -18,10 +18,12 @@ namespace LabWeb.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IBlobStorageService _blobStorageService;
 
-        public UsersController(IUserService userService)
+        public UsersController(IUserService userService, IBlobStorageService blobStorageService)
         {
             _userService = userService;
+            _blobStorageService = blobStorageService;
         }
 
         // GET: api/Users
@@ -36,12 +38,12 @@ namespace LabWeb.Controllers
         {
             var paginatedEntities = await _userService.GetAllPaginatedAsync(skip, limit);
 
-            string? nextLink = String.Empty;
-            if (limit <= paginatedEntities.MappedEntities.Count())
+            foreach (var paginatedEntity in paginatedEntities.MappedEntities)
             {
-                nextLink = Url.Action(nameof(GetPaginatedItems), new { skip = skip + limit, limit });
+                paginatedEntity.ImageName = await _blobStorageService.GetBlobUrl(paginatedEntity.ImageName);
             }
-            paginatedEntities.NextLink = nextLink;
+
+            paginatedEntities.NextLink = CreateNewLink(skip, limit, paginatedEntities.MappedEntities.Count());
 
 
             return paginatedEntities;
@@ -58,6 +60,8 @@ namespace LabWeb.Controllers
                 return NotFound();
             }
 
+            user.ImageName = await _blobStorageService.GetBlobUrl(user.ImageName);
+
             return user;
         }
 
@@ -70,7 +74,6 @@ namespace LabWeb.Controllers
             {
                 return BadRequest();
             }
-
 
             try
             {
@@ -94,11 +97,32 @@ namespace LabWeb.Controllers
         // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<User>> PostUser(UserDto user)
+        public async Task<ActionResult<UserDto>> PostUser(UserDto user)
         {
             var userDto = await _userService.Insert(user);
 
+            userDto.ImageName = await _blobStorageService.GetBlobUrl(userDto.ImageName);
+
             return CreatedAtAction("GetUser", new { id = userDto.Id }, userDto);
+        }
+
+        [HttpPost("uploadImage/{id}")]
+        public async Task<ActionResult<UserDto>> UploadImage([FromRoute] Guid id, IFormFile formFile)
+        {
+            var user = await _userService.FindByIdAsync(id);
+
+            if (user == null)
+            {
+                NotFound("User not found");
+            }
+
+            var blobName = await _blobStorageService.UploadBlob(formFile, user.Id.ToString(), user.ImageName);
+
+            user.ImageName = blobName;
+
+            await _userService.Update(user);
+
+            return Ok(blobName);
         }
 
         // DELETE: api/Users/5
@@ -111,6 +135,7 @@ namespace LabWeb.Controllers
                 return NotFound();
             }
 
+            await _blobStorageService.RemoveBlob(user.ImageName);
             await _userService.DeleteAsync(user);
 
             return NoContent();
@@ -119,6 +144,16 @@ namespace LabWeb.Controllers
         private async Task<bool> UserExists(Guid id)
         {
             return await _userService.FindByIdAsync(id) != null;
+        }
+
+        private string? CreateNewLink(int skip, int limit, int totalCount)
+        {
+            string? nextLink = String.Empty;
+            if (limit <= totalCount)
+            {
+                nextLink = Url.Action(nameof(GetPaginatedItems), new { skip = skip + limit, limit });
+            }
+            return nextLink;
         }
     }
 }
