@@ -1,9 +1,10 @@
 ﻿using LabWeb.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace LabWeb.Context;
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) 
     {
@@ -12,7 +13,7 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<Item> Items { get; set; }
     public DbSet<ShoppingList> ShoppingLists { get; set; }
-    public DbSet<User> Users { get; set; }
+    public DbSet<ApplicationUser> Users { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -22,7 +23,7 @@ public class ApplicationDbContext : DbContext
             .HasForeignKey(i => i.ShoppingListId);
 
         modelBuilder.Entity<ShoppingList>()
-            .HasOne(sl => sl.User)
+            .HasOne(sl => sl.ApplicationUser)
             .WithMany(u => u.ShoppingList)
             .HasForeignKey(sl => sl.UserId);
 

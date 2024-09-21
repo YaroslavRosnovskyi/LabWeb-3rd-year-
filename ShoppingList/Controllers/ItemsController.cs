@@ -30,6 +30,14 @@ namespace LabWeb.Controllers
         //    return await _itemService.GetAllAsync();
         //}
 
+        [HttpPost("create-index")]
+        public async Task<IActionResult> CreateIndex(string indexName)
+        {
+            await _itemService.CreateIndexIfNotExistsAsync(indexName);
+            return Ok($"{indexName} was created");
+        }
+
+
         [HttpGet]
         public async Task<ActionResult<PaginatedResponse<ItemDto>>> GetPaginatedItems([FromQuery] int skip = 0, [FromQuery] int limit = 10)
         {
@@ -112,6 +120,18 @@ namespace LabWeb.Controllers
             await  _itemService.DeleteAsync(item);
 
             return NoContent();
+        }
+
+        [HttpGet("search")]
+        public async Task<ActionResult<List<ItemDto>>> Search([FromQuery] string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return BadRequest("Search query cannot be empty.");
+            }
+
+            var items = await _itemService.SearchAsync(query);
+            return Ok(items);
         }
 
         private async Task<bool> ItemExists(Guid id)

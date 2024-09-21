@@ -16,7 +16,7 @@ namespace LabWeb.Repositories
         {
             return dbSet
                 .Include(sl => sl.Items)
-                .Include(sl => sl.User);
+                .Include(sl => sl.ApplicationUser);
         }
     }
 }

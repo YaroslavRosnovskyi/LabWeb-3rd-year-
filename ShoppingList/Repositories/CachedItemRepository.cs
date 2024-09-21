@@ -92,9 +92,9 @@ public class CachedItemRepository : IItemRepository
 
     public async Task Post(Item entity)
     {
-        string key = $"member-{entity.Id}";
-
         await _decorated.Post(entity);
+
+        string key = $"member-{entity.Id}";
 
         _memoryCache.Set(key, entity);
     }

@@ -1,14 +1,11 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
 
 namespace LabWeb.Models;
 
-public class User : BaseEntity
+public class ApplicationUser : IdentityUser<Guid>
 {
-    [StringLength(50)]
-    public string? Name { get; set; }
-    [EmailAddress]
-    public string? Email { get; set; }
     public string? ImageName { get; set; } = "Default.jpg";
     public ICollection<ShoppingList> ShoppingList { get; set; } = new List<ShoppingList>();
 }

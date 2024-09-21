@@ -5,10 +5,10 @@ using LabWeb.Services.Interfaces;
 
 namespace LabWeb.Services;
 
-public class UserService : GenericService<User, UserDto>, IUserService
-{
-    public UserService(IUserRepository repository) : base(repository)
-    {
+//public class UserService : GenericService<User, UserDto>, IUserService
+//{
+//    public UserService(IUserRepository repository) : base(repository)
+//    {
         
-    }
-}
+//    }
+//}
