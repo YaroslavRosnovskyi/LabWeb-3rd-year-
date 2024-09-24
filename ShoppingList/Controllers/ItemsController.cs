@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using LabWeb.Context;
 using LabWeb.DTOs;
 using LabWeb.Models;
+using LabWeb.Services;
 using LabWeb.Services.Interfaces;
 
 namespace LabWeb.Controllers
@@ -17,10 +18,12 @@ namespace LabWeb.Controllers
     public class ItemsController : ControllerBase
     {
         private readonly IItemService _itemService;
+        private readonly IElasticService _elasticService;
 
-        public ItemsController(IItemService itemService)
+        public ItemsController(IItemService itemService, IElasticService elasticService)
         {
             _itemService = itemService;
+            _elasticService = elasticService;
         }
 
         // GET: api/Items
@@ -30,11 +33,12 @@ namespace LabWeb.Controllers
         //    return await _itemService.GetAllAsync();
         //}
 
+
         [HttpPost("create-index")]
         public async Task<IActionResult> CreateIndex(string indexName)
         {
-            await _itemService.CreateIndexIfNotExistsAsync(indexName);
-            return Ok($"{indexName} was created");
+            await _elasticService.CreateIndexIfNotExists(indexName);
+            return Ok($"Index {indexName} was created");
         }
 
 
@@ -120,18 +124,6 @@ namespace LabWeb.Controllers
             await  _itemService.DeleteAsync(item);
 
             return NoContent();
-        }
-
-        [HttpGet("search")]
-        public async Task<ActionResult<List<ItemDto>>> Search([FromQuery] string query)
-        {
-            if (string.IsNullOrWhiteSpace(query))
-            {
-                return BadRequest("Search query cannot be empty.");
-            }
-
-            var items = await _itemService.SearchAsync(query);
-            return Ok(items);
         }
 
         private async Task<bool> ItemExists(Guid id)

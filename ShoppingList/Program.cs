@@ -90,9 +90,21 @@ builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 
 builder.Services.AddScoped<ITokenService, TokenService>();
 
+builder.Services.Configure<ElasticSettings>(builder.Configuration.GetSection("ElasticsSettings"));
+builder.Services.AddSingleton<IElasticService, ElasticService>();
+
+
 builder.Services.AddMapster();
 
-builder.Services.Configure<ElasticSettings>(builder.Configuration.GetSection("ElasticsSettings"));
+builder.Services.Configure<EmailConfiguration>(builder.Configuration.GetSection("EmailConfiguration"));
+
+builder.Services.AddSingleton<IEmailMessageSender, EmailMessageSender>();
+
+builder.Services.AddScoped<IAzureBusSenderService, AzureBusSenderService>();
+
+builder.Services.AddHostedService<AzureBusReceiverService>();
+
+builder.Services.Configure<SmtpConfiguration>(builder.Configuration.GetSection("SmtpConfiguration"));
 
 builder.Services.AddStackExchangeRedisCache(options =>
 {

@@ -23,13 +23,18 @@ namespace LabWeb.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ITokenService _tokenService;
         private readonly IBlobStorageService _blobStorageService;
+        private readonly IEmailMessageSender _emailSender;
+        private readonly IAzureBusSenderService _azureBusSenderService;
 
-        public UsersController(UserManager<ApplicationUser> userManager, IBlobStorageService blobStorageService, SignInManager<ApplicationUser> signInManager, ITokenService tokenService)
+
+        public UsersController(UserManager<ApplicationUser> userManager, IBlobStorageService blobStorageService, SignInManager<ApplicationUser> signInManager, ITokenService tokenService, IEmailMessageSender emailSender, IAzureBusSenderService azureBusSenderService)
         {
             _userManager = userManager;
             _blobStorageService = blobStorageService;
             _signInManager = signInManager;
             _tokenService = tokenService;
+            _emailSender = emailSender;
+            _azureBusSenderService = azureBusSenderService;
         }
 
         [HttpPost("register")]
@@ -49,9 +54,14 @@ namespace LabWeb.Controllers
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
+            var message = new Message(user.Email! , "Account Confirmation", "ff");
+                await _azureBusSenderService.Send(message);
+            
 
             if (result.Succeeded)
             {
+                
+
                 // Optionally sign in the user automatically after registration
                 await _signInManager.SignInAsync(user, isPersistent: false);
 
