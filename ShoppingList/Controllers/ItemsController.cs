@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using LabWeb.Context;
 using LabWeb.DTOs;
+using LabWeb.DTOs.ItemDTO;
 using LabWeb.Models;
 using LabWeb.Services;
 using LabWeb.Services.Interfaces;
@@ -32,6 +33,18 @@ namespace LabWeb.Controllers
         //{
         //    return await _itemService.GetAllAsync();
         //}
+        [HttpGet("search")]
+        public async Task<ActionResult<List<ItemDto>>> SearchItems([FromQuery] string query, [FromQuery] int skip = 0, [FromQuery] int limit = 10)
+        {
+            if (string.IsNullOrEmpty(query))
+            {
+                return BadRequest("Query parameter cannot be empty.");
+            }
+
+            var items = await _elasticService.Search(query, skip, limit);
+
+            return Ok(items);
+        }
 
 
         [HttpPost("create-index")]
@@ -43,9 +56,11 @@ namespace LabWeb.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult<PaginatedResponse<ItemDto>>> GetPaginatedItems([FromQuery] int skip = 0, [FromQuery] int limit = 10)
+        public async Task<ActionResult<PaginatedResponse<ItemResponse>>> GetPaginatedItems([FromQuery] int skip = 0, [FromQuery] int limit = 10)
         {
             var paginatedEntities = await _itemService.GetAllPaginatedAsync(skip, limit);
+
+            await _elasticService.AddOrUpdateBulk(paginatedEntities.MappedEntities, "items");
 
             string? nextLink = String.Empty;
             if (limit <= paginatedEntities.MappedEntities.Count())
@@ -60,7 +75,7 @@ namespace LabWeb.Controllers
 
         // GET: api/Items/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ItemDto>> GetItem(Guid id)
+        public async Task<ActionResult<ItemResponse>> GetItem(Guid id)
         {
             var item = await _itemService.FindByIdAsync(id);
 
@@ -75,7 +90,7 @@ namespace LabWeb.Controllers
         // PUT: api/Items/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutItem(Guid id, ItemDto item)
+        public async Task<IActionResult> PutItem(Guid id, ItemResponse item)
         {
             if (id != item.Id)
             {
@@ -85,6 +100,7 @@ namespace LabWeb.Controllers
             try
             {
                 await _itemService.Update(item);
+                await _elasticService.AddOrUpdate(item);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -104,9 +120,10 @@ namespace LabWeb.Controllers
         // POST: api/Items
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Item>> PostItem(ItemDto item)
+        public async Task<ActionResult<ItemResponse>> PostItem(ItemRequest item)
         {
             var itemDto = await _itemService.Insert(item);
+            await _elasticService.AddOrUpdate(itemDto);
 
             return CreatedAtAction("GetItem", new { id = itemDto.Id }, itemDto);
         }
@@ -122,6 +139,7 @@ namespace LabWeb.Controllers
             }
 
             await  _itemService.DeleteAsync(item);
+            await _elasticService.Remove(item.Id.ToString());
 
             return NoContent();
         }

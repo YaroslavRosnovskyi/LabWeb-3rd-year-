@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using LabWeb.Context;
 using LabWeb.DTOs;
+using LabWeb.DTOs.ShoppingListDTO;
 using LabWeb.Models;
 using LabWeb.Services.Interfaces;
 using LabWeb.Services;
@@ -32,7 +33,7 @@ namespace LabWeb.Controllers
         //}
 
         [HttpGet]
-        public async Task<ActionResult<PaginatedResponse<ShoppingListDto>>> GetPaginatedItems([FromQuery] int skip = 0, [FromQuery] int limit = 10)
+        public async Task<ActionResult<PaginatedResponse<ShoppingListResponse>>> GetPaginatedItems([FromQuery] int skip = 0, [FromQuery] int limit = 10)
         {
             var paginatedEntities = await _shoppingListService.GetAllPaginatedAsync(skip, limit);
 
@@ -50,7 +51,7 @@ namespace LabWeb.Controllers
 
         // GET: api/ShoppingLists/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ShoppingListDto>> GetShoppingList(Guid id)
+        public async Task<ActionResult<ShoppingListResponse>> GetShoppingList(Guid id)
         {
             var shoppingList = await _shoppingListService.FindByIdAsync(id);
 
@@ -65,7 +66,7 @@ namespace LabWeb.Controllers
         // PUT: api/ShoppingLists/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutShoppingList(Guid id, ShoppingListDto shoppingList)
+        public async Task<IActionResult> PutShoppingList(Guid id, ShoppingListResponse shoppingList)
         {
             if (id != shoppingList.Id)
             {
@@ -95,7 +96,7 @@ namespace LabWeb.Controllers
         // POST: api/ShoppingLists
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<ShoppingListDto>> PostShoppingList(ShoppingListDto shoppingList)
+        public async Task<ActionResult<ShoppingListResponse>> PostShoppingList(ShoppingListRequest shoppingList)
         {
             var shoppingListDto = await _shoppingListService.Insert(shoppingList);
 

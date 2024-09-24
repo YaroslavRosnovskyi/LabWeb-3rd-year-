@@ -1,9 +1,11 @@
-﻿namespace LabWeb.DTOs;
+﻿using LabWeb.DTOs.Interfaces;
 
-public class PaginatedResponse<TMappedEntity>
-   where TMappedEntity : BaseDto
+namespace LabWeb.DTOs;
+
+public class PaginatedResponse<TResponse>
+   where TResponse : IResponse
 {
-    public IEnumerable<TMappedEntity> MappedEntities { get; set; }
+    public IEnumerable<TResponse> MappedEntities { get; set; }
     public int TotalCount { get; set; }
     public int Limit { get; set; }
     public int Skip { get; set; }

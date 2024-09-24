@@ -50,7 +50,7 @@ namespace LabWeb.Controllers
             {
                 UserName = model.Email,
                 Email = model.Email,
-                ImageName = "Default.jpg" // Or handle image as needed
+                ImageName = "Default.jpg" 
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
@@ -61,11 +61,9 @@ namespace LabWeb.Controllers
             if (result.Succeeded)
             {
                 
-
-                // Optionally sign in the user automatically after registration
                 await _signInManager.SignInAsync(user, isPersistent: false);
 
-                // Generate JWT Token
+                
                 var token = await _tokenService.GenerateJwtTokenAsync(user);
                 return Ok(new { Token = token });
             }

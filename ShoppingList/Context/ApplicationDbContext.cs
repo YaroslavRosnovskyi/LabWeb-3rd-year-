@@ -13,7 +13,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
 
     public DbSet<Item> Items { get; set; }
     public DbSet<ShoppingList> ShoppingLists { get; set; }
-    public DbSet<ApplicationUser> Users { get; set; }
+    public DbSet<ItemCategory> ItemCategories { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -26,6 +26,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
             .HasOne(sl => sl.ApplicationUser)
             .WithMany(u => u.ShoppingList)
             .HasForeignKey(sl => sl.UserId);
+
+        modelBuilder.Entity<ItemCategory>()
+            .HasMany(ic => ic.Items)
+            .WithOne(i => i.Category)
+            .HasForeignKey(i => i.ItemCategoryId);
 
         base.OnModelCreating(modelBuilder);
     }

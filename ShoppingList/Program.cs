@@ -41,7 +41,7 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
     .AddRoles<ApplicationRole>()
     .AddUserStore<UserStore<ApplicationUser, ApplicationRole, ApplicationDbContext, Guid>>()
     .AddRoleStore<RoleStore<ApplicationRole, ApplicationDbContext, Guid>>()
-    .AddDefaultTokenProviders(); ;
+    .AddDefaultTokenProviders();
 
 builder.Services.Configure<JwtSettings>(
     builder.Configuration.GetSection("JwtSettings"));
@@ -76,6 +76,11 @@ builder.Services.AddAuthorizationBuilder();
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
 builder.Services.Decorate<IItemRepository, CachedItemRepository>();
 
+builder.Services.AddScoped<IItemCategoryRepository, ItemCategoryRepository>();
+builder.Services.Decorate<IItemCategoryRepository, CachedItemCategoryRepository>();
+
+
+
 //builder.Services.AddScoped<IUserRepository, UserRepository>();
 //builder.Services.Decorate<IUserRepository, CachedUserRepository>();
 
@@ -83,6 +88,7 @@ builder.Services.AddScoped<IShoppingListRepository, ShoppingListRepository>();
 builder.Services.Decorate<IShoppingListRepository, CachedShoppingListRepository>();
 
 builder.Services.AddScoped<IItemService, ItemService>();
+builder.Services.AddScoped<IItemCategoryService, ItemCategoryService>();
 //builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IShoppingListService, ShoppingListService>();
 

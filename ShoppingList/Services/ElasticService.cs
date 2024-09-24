@@ -1,4 +1,6 @@
 ﻿using Elastic.Clients.Elasticsearch;
+using LabWeb.DTOs;
+using LabWeb.DTOs.ItemDTO;
 using LabWeb.Models;
 using Microsoft.Extensions.Options;
 
@@ -23,7 +25,6 @@ namespace LabWeb.Services
         {
             var indexExistsResponse = await _client.Indices.ExistsAsync(indexName);
 
-            // Check if the index does not exist, then create it
             if (!indexExistsResponse.Exists)
             {
                 var createIndexResponse = await _client.Indices.CreateAsync(indexName);
@@ -35,7 +36,7 @@ namespace LabWeb.Services
             }
         }
 
-        public async Task<bool> AddOrUpdate(Item item)
+        public async Task<bool> AddOrUpdate(ItemResponse item)
         {
             var response = await _client.IndexAsync(item, idx => idx.Index(_elasticSettings.DefaultIndex)
                 .OpType(OpType.Index));
@@ -44,7 +45,7 @@ namespace LabWeb.Services
         }
 
 
-        public async Task<bool> AddOrUpdateBulk(IEnumerable<Item> items, string indexName)
+        public async Task<bool> AddOrUpdateBulk(IEnumerable<ItemResponse> items, string indexName)
         {
             var response = await _client.BulkAsync(b => b.Index(_elasticSettings.DefaultIndex)
                 .UpdateMany(items, (ud, u) => ud.Doc(u).DocAsUpsert()));
@@ -52,34 +53,56 @@ namespace LabWeb.Services
             return response.IsValidResponse;
         }
 
-        public async Task<Item> Get(string key)
+        public async Task<ItemResponse> Get(string key)
         {
-            var response = await _client.GetAsync<Item>(key, g => g.Index(_elasticSettings.DefaultIndex));
+            var response = await _client.GetAsync<ItemResponse>(key, g => g.Index(_elasticSettings.DefaultIndex));
 
             return response.Source;
         }
 
 
-        public async Task<List<Item>> GetAll(string key)
+        public async Task<List<ItemResponse>> GetAll(string key)
         {
-            var response = await _client.SearchAsync<Item>(key, g => g.Index(_elasticSettings.DefaultIndex));
+            var response = await _client.SearchAsync<ItemResponse>(key, g => g.Index(_elasticSettings.DefaultIndex));
 
-            return response.IsValidResponse ? response.Documents.ToList() : new List<Item>();
+            return response.IsValidResponse ? response.Documents.ToList() : new List<ItemResponse>();
         }
 
 
         public async Task<bool> Remove(string key)
         {
-            var response = await _client.DeleteAsync<Item>(key, g => g.Index(_elasticSettings.DefaultIndex));
+            var response = await _client.DeleteAsync<ItemResponse>(key, g => g.Index(_elasticSettings.DefaultIndex));
 
             return response.IsValidResponse;
         }
 
         public async Task<long?> RemoveAll()
         {
-            var response = await _client.DeleteByQueryAsync<Item>(g => g.Indices(_elasticSettings.DefaultIndex));
+            var response = await _client.DeleteByQueryAsync<ItemResponse>(g => g.Indices(_elasticSettings.DefaultIndex));
 
             return response.IsValidResponse ? response.Deleted : default;
+        }
+
+        public async Task<List<ItemResponse>> Search(string query, int skip = 0, int limit = 10)
+        {
+
+            var searchResponse = await _client.SearchAsync<ItemResponse>(s => s
+                .Index(_elasticSettings.DefaultIndex)
+                .Query(q => q
+                    .MultiMatch(m => m
+                        .Query(query)
+                        .Fields("name, notes, categoryName")
+                    )
+                )
+
+            );
+
+            if (searchResponse.IsValidResponse)
+            {
+                return searchResponse.Documents.ToList();
+            }
+
+            throw new Exception($"Failed to search for {query}: {searchResponse.DebugInformation}");
         }
     }
 

@@ -14,7 +14,9 @@ namespace LabWeb.Repositories
 
         protected override IQueryable<Item> PrepareDbSet()
         {
-            return dbSet.Include(i => i.ShoppingList);
+            return dbSet
+                .Include(i => i.ShoppingList)
+                .Include(i => i.Category);
         }
     }
 }
