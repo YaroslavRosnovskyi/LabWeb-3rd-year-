@@ -1,4 +1,4 @@
-﻿namespace LabWeb.Models;
+﻿namespace LabWeb.Models.IdentityModels;
 
 public class LoginViewModel
 {

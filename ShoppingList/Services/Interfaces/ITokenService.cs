@@ -1,4 +1,4 @@
-﻿using LabWeb.Models;
+﻿using LabWeb.Models.IdentityModels;
 
 namespace LabWeb.Services.Interfaces
 {

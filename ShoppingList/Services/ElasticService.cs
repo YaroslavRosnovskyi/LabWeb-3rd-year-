@@ -2,6 +2,8 @@
 using LabWeb.DTOs;
 using LabWeb.DTOs.ItemDTO;
 using LabWeb.Models;
+using LabWeb.Services.Interfaces;
+using LabWeb.SettingOptions;
 using Microsoft.Extensions.Options;
 
 namespace LabWeb.Services
@@ -119,13 +121,5 @@ namespace LabWeb.Services
 
             throw new Exception($"Failed to search for {query}: {searchResponse.DebugInformation}");
         }
-    }
-
-    public class ElasticSettings  
-    {
-        public string Url { get; set; }
-        public string DefaultIndex { get; set; }
-        public string Username { get; set; }
-        public string Password { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿using LabWeb.DTOs;
+﻿using LabWeb.DTOs.ServiceBusDTO;
 using LabWeb.Services.Interfaces;
 using LabWeb.SettingOptions;
 using Microsoft.Extensions.Options;

@@ -1,4 +1,4 @@
-﻿using LabWeb.DTOs;
+﻿using LabWeb.DTOs.ServiceBusDTO;
 using MimeKit;
 
 namespace LabWeb.Services.Interfaces;

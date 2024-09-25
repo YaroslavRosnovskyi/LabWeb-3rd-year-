@@ -1,4 +1,5 @@
-﻿using LabWeb.Models;
+﻿using LabWeb.Models.Entities;
+using LabWeb.Models.IdentityModels;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 

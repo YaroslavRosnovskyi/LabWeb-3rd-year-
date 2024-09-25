@@ -1,10 +1,10 @@
-﻿using LabWeb.Models;
+﻿using LabWeb.Models.Entities;
 using LabWeb.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.Extensions.Caching.Memory;
 using System.Linq.Expressions;
 
-namespace LabWeb.Repositories;
+namespace LabWeb.Repositories.CachedRepositories;
 
 public class CachedItemCategoryRepository : IItemCategoryRepository
 {

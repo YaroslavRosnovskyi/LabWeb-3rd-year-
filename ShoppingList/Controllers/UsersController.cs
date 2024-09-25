@@ -7,13 +7,17 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using LabWeb.Context;
 using LabWeb.DTOs;
+using LabWeb.DTOs.ServiceBusDTO;
 using LabWeb.DTOs.ShoppingListDTO;
-using LabWeb.Models;
 using LabWeb.Services.Interfaces;
-using LabWeb.Services;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using LabWeb.Models.IdentityModels;
+using LabWeb.Services.Interfaces.AzureInterfaces;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Cors;
+using Elastic.Clients.Elasticsearch.Security;
 
 namespace LabWeb.Controllers
 {
@@ -93,7 +97,6 @@ namespace LabWeb.Controllers
             var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, lockoutOnFailure: false);
             if (result.Succeeded)
             {
-                // Generate JWT Token
                 var token = await _tokenService.GenerateJwtTokenAsync(user);
                 return Ok(new { Token = token, UserId = user.Id });
             }
@@ -101,11 +104,75 @@ namespace LabWeb.Controllers
             return Unauthorized("Invalid email or password");
         }
 
+        [HttpGet("external-login/{provider}")]
+        public IActionResult ExternalLogin(string provider, string returnUrl = null)
+        {
+            var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Users", new { ReturnUrl = returnUrl });
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            return Challenge(properties, provider);
+        }
+
+        // GET: api/auth/external-login-callback
+        [HttpGet("external-login-callback")]
+        public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
+        {
+            if (remoteError != null)
+            {
+                return BadRequest($"Error from external provider: {remoteError}");
+            }
+
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+            if (info == null)
+            {
+                return Unauthorized("Error loading external login information.");
+            }
+
+            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false);
+            if (result.Succeeded)
+            {
+                var user = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+                var token = await _tokenService.GenerateJwtTokenAsync(user);
+                return Ok(new { Token = token, UserId = user.Id });
+            }
+
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+            if (email == null)
+            {
+                return BadRequest("Email claim not received from external provider.");
+            }
+
+            var applicationUser = new ApplicationUser
+            {
+                UserName = email,
+                Email = email
+            };
+
+            var createResult = await _userManager.CreateAsync(applicationUser);
+            if (!createResult.Succeeded)
+            {
+                return BadRequest(createResult.Errors);
+            }
+
+            var addLoginResult = await _userManager.AddLoginAsync(applicationUser, info);
+            if (!addLoginResult.Succeeded)
+            {
+                return BadRequest(addLoginResult.Errors);
+            }
+
+            var message = new Message(applicationUser.Email!, "Registration", "Registration was successful");
+            await _azureBusSenderService.Send(message);
+
+            await _signInManager.SignInAsync(applicationUser, isPersistent: false);
+
+            var jwtToken = await _tokenService.GenerateJwtTokenAsync(applicationUser);
+
+            return Ok(new { Token = jwtToken, UserId = applicationUser.Id });
+        }
 
 
         [Authorize]
         [HttpPost("uploadImage/{userName}")]
-        public async Task<ActionResult<UserDto>> UploadImage([FromRoute] string userName, IFormFile formFile)
+        public async Task<IActionResult> UploadImage([FromRoute] string userName, IFormFile formFile)
         {
             var user = await _userManager.FindByNameAsync(userName);
 
@@ -120,7 +187,7 @@ namespace LabWeb.Controllers
 
             await _userManager.UpdateAsync(user);
 
-            return Ok(blobName);
+            return Ok($"Image upload was successful, blob name: {blobName}");
         }
 
         [HttpGet("shopping-list/{id}")]

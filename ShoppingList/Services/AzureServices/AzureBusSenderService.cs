@@ -1,8 +1,9 @@
 ﻿using Azure.Messaging.ServiceBus;
-using LabWeb.DTOs;
+using LabWeb.DTOs.ServiceBusDTO;
+using LabWeb.Services.Interfaces.AzureInterfaces;
 using Newtonsoft.Json;
 
-namespace LabWeb.Services
+namespace LabWeb.Services.AzureServices
 {
     public class AzureBusSenderService : IAzureBusSenderService
     {

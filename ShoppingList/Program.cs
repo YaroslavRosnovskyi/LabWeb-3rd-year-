@@ -1,5 +1,4 @@
 using LabWeb.Context;
-using LabWeb.Models;
 using LabWeb.Repositories;
 using LabWeb.Repositories.Interfaces;
 using LabWeb.Services;
@@ -14,7 +13,12 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Configuration;
 using System.Text;
+using LabWeb.Extensions;
 using LabWeb.SettingOptions;
+using LabWeb.Models.IdentityModels;
+using LabWeb.Repositories.CachedRepositories;
+using LabWeb.Services.AzureServices;
+using LabWeb.Services.Interfaces.AzureInterfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,25 +27,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 
-var connection = builder.Configuration.GetConnectionString("AzureSqlDatabase");
-
-if (builder.Environment.IsDevelopment())
-{
-    connection = builder.Configuration.GetConnectionString("AzureSqlDatabase");
-}
-
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-{
-    options.UseSqlServer(connection);
-});
-
-builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddApiEndpoints()
-    .AddRoles<ApplicationRole>()
-    .AddUserStore<UserStore<ApplicationUser, ApplicationRole, ApplicationDbContext, Guid>>()
-    .AddRoleStore<RoleStore<ApplicationRole, ApplicationDbContext, Guid>>()
-    .AddDefaultTokenProviders();
 
 builder.Services.Configure<JwtSettings>(
     builder.Configuration.GetSection("JwtSettings"));
@@ -49,6 +34,16 @@ builder.Services.Configure<JwtSettings>(
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
 var key = Encoding.ASCII.GetBytes(jwtSettings.Secret);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("DefaultPolicy", p =>
+    {
+        p.AllowAnyHeader()
+            .AllowAnyMethod()
+            .SetIsOriginAllowed(origin => true) // This allows any origin
+            .AllowCredentials();
+    });
+});
 
 
 
@@ -56,6 +51,11 @@ builder.Services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
         options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddGoogle(googleOptions =>
+    {
+        googleOptions.ClientId = builder.Configuration.GetSection("Authentication")["Google:ClientId"];
+        googleOptions.ClientSecret = builder.Configuration.GetSection("Authentication")["Google:ClientSecret"];
     })
     .AddJwtBearer(options =>
     {
@@ -73,23 +73,10 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorizationBuilder();
 
-builder.Services.AddScoped<IItemRepository, ItemRepository>();
-builder.Services.Decorate<IItemRepository, CachedItemRepository>();
-
-builder.Services.AddScoped<IItemCategoryRepository, ItemCategoryRepository>();
-builder.Services.Decorate<IItemCategoryRepository, CachedItemCategoryRepository>();
-
-
-
-//builder.Services.AddScoped<IUserRepository, UserRepository>();
-//builder.Services.Decorate<IUserRepository, CachedUserRepository>();
-
-builder.Services.AddScoped<IShoppingListRepository, ShoppingListRepository>();
-builder.Services.Decorate<IShoppingListRepository, CachedShoppingListRepository>();
+builder.Services.AddRepositories();
 
 builder.Services.AddScoped<IItemService, ItemService>();
 builder.Services.AddScoped<IItemCategoryService, ItemCategoryService>();
-//builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IShoppingListService, ShoppingListService>();
 
 builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
@@ -145,14 +132,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("DefaultPolicy");
+
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
 
 app.UseAuthorization();
 
-
 app.MapControllers();
-
 
 app.Run();

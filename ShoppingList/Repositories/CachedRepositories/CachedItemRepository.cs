@@ -1,12 +1,12 @@
 ﻿using System.Linq.Expressions;
-using LabWeb.Models;
+using LabWeb.Models.Entities;
 using LabWeb.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 
-namespace LabWeb.Repositories;
+namespace LabWeb.Repositories.CachedRepositories;
 
 public class CachedItemRepository : IItemRepository
 {
@@ -32,7 +32,7 @@ public class CachedItemRepository : IItemRepository
     //not
     public void DeleteAll(IEnumerable<Item> entities)
     {
-        _decorated.DeleteAll(entities); 
+        _decorated.DeleteAll(entities);
     }
 
     //not

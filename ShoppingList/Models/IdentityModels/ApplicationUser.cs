@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using LabWeb.Models.Entities;
 using Microsoft.AspNetCore.Identity;
 
-namespace LabWeb.Models;
+namespace LabWeb.Models.IdentityModels;
 
 public class ApplicationUser : IdentityUser<Guid>
 {

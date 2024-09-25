@@ -1,10 +1,10 @@
 ﻿using System.Net;
-using LabWeb.DTOs;
 using LabWeb.Services.Interfaces;
 using LabWeb.SettingOptions;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using MailKit.Net.Smtp;
+using LabWeb.DTOs.ServiceBusDTO;
 
 namespace LabWeb.Services;
 

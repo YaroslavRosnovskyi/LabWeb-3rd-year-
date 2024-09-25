@@ -1,10 +1,10 @@
 ﻿using Azure.Messaging.ServiceBus;
 using Elastic.Clients.Elasticsearch.Nodes;
-using LabWeb.DTOs;
+using LabWeb.DTOs.ServiceBusDTO;
 using LabWeb.Services.Interfaces;
 using Newtonsoft.Json;
 
-namespace LabWeb.Services;
+namespace LabWeb.Services.AzureServices;
 
 public class AzureBusReceiverService : IHostedService
 {

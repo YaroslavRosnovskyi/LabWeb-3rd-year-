@@ -2,7 +2,7 @@
 using LabWeb.DTOs;
 using LabWeb.DTOs.ItemDTO;
 using LabWeb.Migrations;
-using LabWeb.Models;
+using LabWeb.Models.Entities;
 using LabWeb.Repositories.Interfaces;
 using LabWeb.Services.Interfaces;
 using LabWeb.SettingOptions;

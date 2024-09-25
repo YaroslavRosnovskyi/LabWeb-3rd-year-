@@ -1,6 +1,6 @@
-﻿using LabWeb.DTOs;
+﻿using LabWeb.DTOs.ServiceBusDTO;
 
-namespace LabWeb.Services
+namespace LabWeb.Services.Interfaces.AzureInterfaces
 {
     public interface IAzureBusSenderService
     {

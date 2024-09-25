@@ -1,7 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using LabWeb.Models.IdentityModels;
 
-namespace LabWeb.Models;
+namespace LabWeb.Models.Entities;
 
 public class ShoppingList : BaseEntity
 {

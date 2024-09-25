@@ -2,7 +2,7 @@
 using MimeKit;
 using Newtonsoft.Json;
 
-namespace LabWeb.DTOs
+namespace LabWeb.DTOs.ServiceBusDTO
 {
     public class Message
     {

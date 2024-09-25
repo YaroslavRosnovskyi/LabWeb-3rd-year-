@@ -1,5 +1,5 @@
 ﻿using LabWeb.Context;
-using LabWeb.Models;
+using LabWeb.Models.Entities;
 using LabWeb.Repositories.Interfaces;
 
 namespace LabWeb.Repositories;

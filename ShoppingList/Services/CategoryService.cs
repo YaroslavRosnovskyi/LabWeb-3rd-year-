@@ -1,6 +1,6 @@
 ﻿using LabWeb.DTOs.ItemCategoryDTO;
 using LabWeb.DTOs.ItemDTO;
-using LabWeb.Models;
+using LabWeb.Models.Entities;
 using LabWeb.Repositories.Interfaces;
 using LabWeb.Services.Interfaces;
 

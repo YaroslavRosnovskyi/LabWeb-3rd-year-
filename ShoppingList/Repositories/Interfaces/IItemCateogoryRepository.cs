@@ -1,4 +1,4 @@
-﻿using LabWeb.Models;
+﻿using LabWeb.Models.Entities;
 
 namespace LabWeb.Repositories.Interfaces;
 

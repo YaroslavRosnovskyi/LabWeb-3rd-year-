@@ -1,6 +1,6 @@
 ﻿using LabWeb.DTOs.ItemDTO;
 
-namespace LabWeb.Services
+namespace LabWeb.Services.Interfaces
 {
     public interface IElasticService
     {

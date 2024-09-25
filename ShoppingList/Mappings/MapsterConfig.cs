@@ -1,5 +1,5 @@
 ﻿using LabWeb.DTOs.ItemDTO;
-using LabWeb.Models;
+using LabWeb.Models.Entities;
 using Mapster;
 
 namespace LabWeb.Mappings;

@@ -1,10 +1,10 @@
 ﻿using System.Linq.Expressions;
-using LabWeb.Models;
+using LabWeb.Models.Entities;
 using LabWeb.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace LabWeb.Repositories;
+namespace LabWeb.Repositories.CachedRepositories;
 
 public class CachedShoppingListRepository : IShoppingListRepository
 {
@@ -90,7 +90,7 @@ public class CachedShoppingListRepository : IShoppingListRepository
     public async Task Post(ShoppingList entity)
     {
         await _decorated.Post(entity);
-      
+
     }
 
     public async Task SaveChangesAsync()

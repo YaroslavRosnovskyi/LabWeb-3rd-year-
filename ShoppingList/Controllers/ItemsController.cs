@@ -9,7 +9,6 @@ using LabWeb.Context;
 using LabWeb.DTOs;
 using LabWeb.DTOs.ItemDTO;
 using LabWeb.Models;
-using LabWeb.Services;
 using LabWeb.Services.Interfaces;
 
 namespace LabWeb.Controllers
@@ -34,7 +33,7 @@ namespace LabWeb.Controllers
         //    return await _itemService.GetAllAsync();
         //}
         [HttpGet("search")]
-        public async Task<ActionResult<List<ItemDto>>> SearchItems([FromQuery] string query, [FromQuery] int skip = 0, [FromQuery] int limit = 10)
+        public async Task<ActionResult<List<ItemResponse>>> SearchItems([FromQuery] string query, [FromQuery] int skip = 0, [FromQuery] int limit = 10)
         {
             if (string.IsNullOrEmpty(query))
             {

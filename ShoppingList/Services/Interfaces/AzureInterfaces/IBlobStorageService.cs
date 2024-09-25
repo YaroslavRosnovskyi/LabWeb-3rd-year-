@@ -1,5 +1,4 @@
-﻿
-namespace LabWeb.Services.Interfaces
+﻿namespace LabWeb.Services.Interfaces.AzureInterfaces
 {
     public interface IBlobStorageService
     {

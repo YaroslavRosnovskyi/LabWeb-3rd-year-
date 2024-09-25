@@ -1,8 +1,9 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using LabWeb.Models;
+using LabWeb.Models.IdentityModels;
 using LabWeb.Services.Interfaces;
+using LabWeb.Services.Interfaces.AzureInterfaces;
 using LabWeb.SettingOptions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;

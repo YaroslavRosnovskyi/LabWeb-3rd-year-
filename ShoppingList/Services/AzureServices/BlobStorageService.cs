@@ -1,10 +1,10 @@
-﻿using LabWeb.Services.Interfaces;
-using Azure.Storage.Blobs;
+﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Sas;
+using LabWeb.Services.Interfaces.AzureInterfaces;
 
 
-namespace LabWeb.Services;
+namespace LabWeb.Services.AzureServices;
 
 public class BlobStorageService : IBlobStorageService
 {

@@ -3,7 +3,7 @@ using LabWeb.DTOs.Interfaces;
 using LabWeb.Migrations;
 using System.Linq.Expressions;
 
-namespace LabWeb.Services
+namespace LabWeb.Services.Interfaces
 {
     public interface IGenericService<TRequest, TResponse>
         where TRequest : IRequest

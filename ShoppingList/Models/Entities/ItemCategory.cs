@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace LabWeb.Models;
+namespace LabWeb.Models.Entities;
 
 public class ItemCategory : BaseEntity
 {
