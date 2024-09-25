@@ -102,6 +102,7 @@ builder.Services.AddSingleton<IElasticService, ElasticService>();
 
 builder.Services.AddMapster();
 
+
 builder.Services.Configure<EmailConfiguration>(builder.Configuration.GetSection("EmailConfiguration"));
 
 builder.Services.AddSingleton<IEmailMessageSender, EmailMessageSender>();

@@ -10,6 +10,7 @@ public class ItemResponse : IResponse
     public int Quantity { get; set; }
     public string Notes { get; set; }
     public decimal Price { get; set; }
-    public string CategoryName { get; set; }
+    public string? CategoryName { get; set; }
     public Guid ShoppingListId { get; set; }
+    public Guid ItemCategoryId { get; set; }
 }

@@ -21,9 +21,9 @@ namespace LabWeb.Services
             var emailMessage = new MimeMessage();
 
             var bodyBuilder = new BodyBuilder();
-            bodyBuilder.HtmlBody = $"Link to confirm your email <a href={message.Content}>Link</a>";
+            bodyBuilder.HtmlBody = $"Registration was successful";
 
-            emailMessage.From.Add(new MailboxAddress("Cinema", _emailConfig.From));
+            emailMessage.From.Add(new MailboxAddress("LabWeb", _emailConfig.From));
             emailMessage.To.Add(message.To);
             emailMessage.Subject = message.Subject;
             emailMessage.Body = bodyBuilder.ToMessageBody();

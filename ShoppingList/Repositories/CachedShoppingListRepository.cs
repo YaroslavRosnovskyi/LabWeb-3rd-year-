@@ -89,11 +89,8 @@ public class CachedShoppingListRepository : IShoppingListRepository
 
     public async Task Post(ShoppingList entity)
     {
-        string key = $"member-{entity.Id}";
-
         await _decorated.Post(entity);
-
-        _memoryCache.Set(key, entity);
+      
     }
 
     public async Task SaveChangesAsync()

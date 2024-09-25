@@ -15,6 +15,7 @@ public static class MapsterConfig
             .Map(dest => dest.ShoppingListId, src => src.ShoppingListId)
             .Map(dest => dest.Quantity, src => src.Quantity)
             .Map(dest => dest.Price, src => src.Price)
+            .Map(dest => dest.ItemCategoryId, src => src.ItemCategoryId)
             .Map(dest => dest.CategoryName, src => src.Category.Name);
 
     }

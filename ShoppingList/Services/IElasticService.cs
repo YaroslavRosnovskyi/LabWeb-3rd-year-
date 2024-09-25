@@ -12,5 +12,6 @@ namespace LabWeb.Services
         Task<bool> Remove(string key);
         Task<long?> RemoveAll();
         Task<List<ItemResponse>> Search(string query, int skip = 0, int limit = 10);
+        Task DeleteIndexIfExists(string indexName);
     }
 }

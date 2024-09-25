@@ -6,5 +6,5 @@ namespace LabWeb.Services.Interfaces;
 
 public interface IShoppingListService : IGenericService<ShoppingListRequest, ShoppingListResponse>
 {
-    
+    List<ShoppingListResponse> GetShoppingListByUserId(Guid userId);
 }

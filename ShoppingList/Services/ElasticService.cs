@@ -36,6 +36,21 @@ namespace LabWeb.Services
             }
         }
 
+        public async Task DeleteIndexIfExists(string indexName)
+        {
+            var indexExistsResponse = await _client.Indices.ExistsAsync(indexName);
+
+            if (indexExistsResponse.Exists)
+            {
+                var createIndexResponse = await _client.Indices.DeleteAsync(indexName);
+
+                if (!createIndexResponse.IsSuccess())
+                {
+                    throw new Exception($"Failed to create index {indexName}: {createIndexResponse.DebugInformation}");
+                }
+            }
+        }
+
         public async Task<bool> AddOrUpdate(ItemResponse item)
         {
             var response = await _client.IndexAsync(item, idx => idx.Index(_elasticSettings.DefaultIndex)

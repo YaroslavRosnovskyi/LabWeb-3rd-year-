@@ -54,6 +54,12 @@ namespace LabWeb.Controllers
             return Ok($"Index {indexName} was created");
         }
 
+        [HttpPost("delete-index")]
+        public async Task<IActionResult> DeleteIndex(string indexName)
+        {
+            await _elasticService.DeleteIndexIfExists(indexName);
+            return Ok($"Index {indexName} was created");
+        }
 
         [HttpGet]
         public async Task<ActionResult<PaginatedResponse<ItemResponse>>> GetPaginatedItems([FromQuery] int skip = 0, [FromQuery] int limit = 10)
@@ -123,9 +129,14 @@ namespace LabWeb.Controllers
         public async Task<ActionResult<ItemResponse>> PostItem(ItemRequest item)
         {
             var itemDto = await _itemService.Insert(item);
-            await _elasticService.AddOrUpdate(itemDto);
 
-            return CreatedAtAction("GetItem", new { id = itemDto.Id }, itemDto);
+            var newItem = await _itemService.FindByIdAsync(itemDto.Id);
+            if (newItem != null)
+            {
+                await _elasticService.AddOrUpdate(newItem);
+            }
+
+            return CreatedAtAction("GetItem", new { id = newItem.Id }, newItem);
         }
 
         // DELETE: api/Items/5

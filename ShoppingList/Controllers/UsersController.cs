@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using LabWeb.Context;
 using LabWeb.DTOs;
+using LabWeb.DTOs.ShoppingListDTO;
 using LabWeb.Models;
 using LabWeb.Services.Interfaces;
 using LabWeb.Services;
+using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 
@@ -23,18 +25,19 @@ namespace LabWeb.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ITokenService _tokenService;
         private readonly IBlobStorageService _blobStorageService;
-        private readonly IEmailMessageSender _emailSender;
         private readonly IAzureBusSenderService _azureBusSenderService;
+        private readonly IShoppingListService _shoppingListService;
 
 
-        public UsersController(UserManager<ApplicationUser> userManager, IBlobStorageService blobStorageService, SignInManager<ApplicationUser> signInManager, ITokenService tokenService, IEmailMessageSender emailSender, IAzureBusSenderService azureBusSenderService)
+        public UsersController(UserManager<ApplicationUser> userManager, IBlobStorageService blobStorageService,
+            SignInManager<ApplicationUser> signInManager, ITokenService tokenService, IAzureBusSenderService azureBusSenderService, IShoppingListService shoppingListService)
         {
             _userManager = userManager;
             _blobStorageService = blobStorageService;
             _signInManager = signInManager;
             _tokenService = tokenService;
-            _emailSender = emailSender;
             _azureBusSenderService = azureBusSenderService;
+            _shoppingListService = shoppingListService;
         }
 
         [HttpPost("register")]
@@ -50,28 +53,29 @@ namespace LabWeb.Controllers
             {
                 UserName = model.Email,
                 Email = model.Email,
-                ImageName = "Default.jpg" 
+                ImageName = "Default.jpg"
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
-            var message = new Message(user.Email! , "Account Confirmation", "ff");
-                await _azureBusSenderService.Send(message);
-            
+
+
 
             if (result.Succeeded)
             {
-                
+                var message = new Message(user.Email!, "Registration", "Registration was successful");
+                await _azureBusSenderService.Send(message);
+
                 await _signInManager.SignInAsync(user, isPersistent: false);
 
-                
                 var token = await _tokenService.GenerateJwtTokenAsync(user);
-                return Ok(new { Token = token });
+                return Ok(new { Token = token, UserId = user.Id });
             }
 
             foreach (var error in result.Errors)
             {
                 ModelState.AddModelError(string.Empty, error.Description);
             }
+
             return BadRequest(ModelState);
         }
 
@@ -91,91 +95,13 @@ namespace LabWeb.Controllers
             {
                 // Generate JWT Token
                 var token = await _tokenService.GenerateJwtTokenAsync(user);
-                return Ok(new { Token = token });
+                return Ok(new { Token = token, UserId = user.Id });
             }
 
             return Unauthorized("Invalid email or password");
         }
 
-        // GET: api/Users
-        //[HttpGet]
-        //public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
-        //{
-        //    return await _userService.GetAllAsync();
-        //}
 
-        //[HttpGet]
-        //public async Task<ActionResult<PaginatedResponse<UserDto>>> GetPaginatedItems([FromQuery] int skip = 0, [FromQuery] int limit = 10)
-        //{
-        //    var paginatedEntities = await _userManager.GetAllPaginatedAsync(skip, limit);
-
-        //    foreach (var paginatedEntity in paginatedEntities.MappedEntities)
-        //    {
-        //        paginatedEntity.ImageName = await _blobStorageService.GetBlobUrl(paginatedEntity.ImageName);
-        //    }
-
-        //    paginatedEntities.NextLink = CreateNewLink(skip, limit, paginatedEntities.MappedEntities.Count());
-
-
-        //    return paginatedEntities;
-        //}
-
-        // GET: api/Users/5
-        //[HttpGet("{id}")]
-        //public async Task<ActionResult<UserDto>> GetUser(Guid id)
-        //{
-        //    var user = await _userManager.FindByIdAsync(id);
-
-        //    if (user == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    user.ImageName = await _blobStorageService.GetBlobUrl(user.ImageName);
-
-        //    return user;
-        //}
-
-        // PUT: api/Users/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> PutUser(Guid id, UserDto user)
-        //{
-        //    if (id != user.Id)
-        //    {
-        //        return BadRequest();
-        //    }
-
-        //    try
-        //    {
-        //        await _userManager.Update(user);
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!await UserExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
-
-        //    return NoContent();
-        //}
-
-        // POST: api/Users
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPost]
-        //public async Task<ActionResult<UserDto>> PostUser(UserDto user)
-        //{
-        //    var userDto = await _userManager.Insert(user);
-
-        //    userDto.ImageName = await _blobStorageService.GetBlobUrl(userDto.ImageName);
-
-        //    return CreatedAtAction("GetUser", new { id = userDto.Id }, userDto);
-        //}
 
         [Authorize]
         [HttpPost("uploadImage/{userName}")]
@@ -183,7 +109,7 @@ namespace LabWeb.Controllers
         {
             var user = await _userManager.FindByNameAsync(userName);
 
-            if (user == null)   
+            if (user == null)
             {
                 NotFound("User not found");
             }
@@ -197,35 +123,34 @@ namespace LabWeb.Controllers
             return Ok(blobName);
         }
 
-        // DELETE: api/Users/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteUser(Guid id)
-        //{
-        //    var user = await _userManager.FindByIdAsync(id);
-        //    if (user == null)
-        //    {
-        //        return NotFound();
-        //    }
+        [HttpGet("shopping-list/{id}")]
+        public async Task<ActionResult<List<ShoppingListResponse>>> GetShoppingListByUserId(Guid id)
+        {
+            var user = await _userManager.FindByIdAsync(id.ToString());
+            if (user == null)
+            {
+                return BadRequest("User Not Found");
+            }
 
-        //    await _blobStorageService.RemoveBlob(user.ImageName);
-        //    await _userManager.DeleteAsync(user);
+            var shoppingListResponse =  _shoppingListService.GetShoppingListByUserId(user.Id);
 
-        //    return NoContent();
-        //}
+            return Ok(shoppingListResponse);
+        }
 
-        //private async Task<bool> UserExists(Guid id)
-        //{
-        //    return await _userManager.FindByIdAsync(id) != null;
-        //}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUser(Guid id)
+        {
+            var user = await _userManager.FindByIdAsync(id.ToString());
+            if (user == null)
+            {
+                return NotFound();
+            }
 
-        //private string? CreateNewLink(int skip, int limit, int totalCount)
-        //{
-        //    string? nextLink = String.Empty;
-        //    if (limit <= totalCount)
-        //    {
-        //        nextLink = Url.Action(nameof(GetPaginatedItems), new { skip = skip + limit, limit });
-        //    }
-        //    return nextLink;
-        //}
+            await _blobStorageService.RemoveBlob(user.ImageName);
+            await _userManager.DeleteAsync(user);
+
+            return NoContent();
+        }
     }
-}
+} 
+        
