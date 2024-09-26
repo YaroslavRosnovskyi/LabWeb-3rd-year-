@@ -57,6 +57,10 @@ public class BlobStorageService : IBlobStorageService
 
     public async Task RemoveBlob(string imageName)
     {
+        if (imageName == "Default.jpg")
+        {
+            return;
+        }
         var container = await GetBlobContainerClient();
         var blob = container.GetBlobClient(imageName);
         await blob.DeleteIfExistsAsync(DeleteSnapshotsOption.IncludeSnapshots);

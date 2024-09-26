@@ -38,7 +38,7 @@ namespace LabWeb.Services
 
             var paginatedResponse = new PaginatedResponse<TResponse>
             {
-                MappedEntities = mappedEntities,
+                Entities = mappedEntities,
                 TotalCount = mappedEntities.Count,
                 Limit = limit,
                 Skip = skip,

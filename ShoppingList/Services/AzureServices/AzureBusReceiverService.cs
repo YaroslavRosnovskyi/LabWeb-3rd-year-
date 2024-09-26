@@ -9,6 +9,12 @@ namespace LabWeb.Services.AzureServices;
 public class AzureBusReceiverService : IHostedService
 {
     private readonly IEmailMessageSender _emailSender;
+    private const string serviceBusConnectionString =
+        "Endpoint=sb://az-lab-web-bus.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=cb6AmJW64jnbZmYpMVjTYl3NBFKeXUodB+ASbHHH5NQ=";
+    private const string queueName = "az-lab-web-queue";
+    const int maxNumberOfMessages = 3;
+    ServiceBusClient client;
+    ServiceBusProcessor processor = default!;
 
     public AzureBusReceiverService(IEmailMessageSender emailSender)
     {
@@ -16,18 +22,6 @@ public class AzureBusReceiverService : IHostedService
         client = new ServiceBusClient(serviceBusConnectionString);
         processor = client.CreateProcessor(queueName, new ServiceBusProcessorOptions());
     }
-
-    private const string serviceBusConnectionString =
-        "Endpoint=sb://az-lab-web-bus.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=cb6AmJW64jnbZmYpMVjTYl3NBFKeXUodB+ASbHHH5NQ=";
-
-    private const string queueName = "az-lab-web-queue";
-
-    const int maxNumberOfMessages = 3;
-
-    ServiceBusClient client;
-    ServiceBusProcessor processor = default!;
-
-
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {

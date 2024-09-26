@@ -33,8 +33,13 @@ namespace LabWeb.Controllers
         private readonly IShoppingListService _shoppingListService;
 
 
-        public UsersController(UserManager<ApplicationUser> userManager, IBlobStorageService blobStorageService,
-            SignInManager<ApplicationUser> signInManager, ITokenService tokenService, IAzureBusSenderService azureBusSenderService, IShoppingListService shoppingListService)
+        public UsersController(
+            UserManager<ApplicationUser> userManager, 
+            IBlobStorageService blobStorageService,
+            SignInManager<ApplicationUser> signInManager, 
+            ITokenService tokenService, 
+            IAzureBusSenderService azureBusSenderService, 
+            IShoppingListService shoppingListService)
         {
             _userManager = userManager;
             _blobStorageService = blobStorageService;
@@ -62,8 +67,6 @@ namespace LabWeb.Controllers
 
             var result = await _userManager.CreateAsync(user, model.Password);
 
-
-
             if (result.Succeeded)
             {
                 var message = new Message(user.Email!, "Registration", "Registration was successful");
@@ -83,7 +86,6 @@ namespace LabWeb.Controllers
             return BadRequest(ModelState);
         }
 
-        // POST: api/auth/login
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginViewModel model)
         {
@@ -112,7 +114,6 @@ namespace LabWeb.Controllers
             return Challenge(properties, provider);
         }
 
-        // GET: api/auth/external-login-callback
         [HttpGet("external-login-callback")]
         public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
         {
@@ -144,7 +145,8 @@ namespace LabWeb.Controllers
             var applicationUser = new ApplicationUser
             {
                 UserName = email,
-                Email = email
+                Email = email,
+                ImageName = "Default.jpg"
             };
 
             var createResult = await _userManager.CreateAsync(applicationUser);
@@ -171,10 +173,10 @@ namespace LabWeb.Controllers
 
 
         [Authorize]
-        [HttpPost("uploadImage/{userName}")]
-        public async Task<IActionResult> UploadImage([FromRoute] string userName, IFormFile formFile)
+        [HttpPost("uploadImage/{id}")]
+        public async Task<IActionResult> UploadImage([FromRoute] Guid id, IFormFile formFile)
         {
-            var user = await _userManager.FindByNameAsync(userName);
+            var user = await _userManager.FindByIdAsync(id.ToString());
 
             if (user == null)
             {
@@ -191,7 +193,7 @@ namespace LabWeb.Controllers
         }
 
         [HttpGet("shopping-list/{id}")]
-        public async Task<ActionResult<List<ShoppingListResponse>>> GetShoppingListByUserId(Guid id)
+        public async Task<ActionResult<List<ShoppingListResponse>>> GetShoppingListByUserId([FromRoute] Guid id)
         {
             var user = await _userManager.FindByIdAsync(id.ToString());
             if (user == null)
@@ -205,7 +207,7 @@ namespace LabWeb.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(Guid id)
+        public async Task<IActionResult> DeleteUser([FromRoute] Guid id)
         {
             var user = await _userManager.FindByIdAsync(id.ToString());
             if (user == null)

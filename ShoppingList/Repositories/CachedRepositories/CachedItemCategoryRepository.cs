@@ -3,6 +3,7 @@ using LabWeb.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.Extensions.Caching.Memory;
 using System.Linq.Expressions;
+using LabWeb.Context;
 
 namespace LabWeb.Repositories.CachedRepositories;
 

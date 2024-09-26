@@ -25,12 +25,6 @@ namespace LabWeb.Controllers
             _shoppingListService = shoppingListService;
         }
 
-        // GET: api/ShoppingLists
-        //[HttpGet]
-        //public async Task<ActionResult<IEnumerable<ShoppingListDto>>> GetShoppingLists()
-        //{
-        //    return await _shoppingListService.GetAllAsync();
-        //}
 
         [HttpGet]
         public async Task<ActionResult<PaginatedResponse<ShoppingListResponse>>> GetPaginatedItems([FromQuery] int skip = 0, [FromQuery] int limit = 10)
@@ -38,7 +32,7 @@ namespace LabWeb.Controllers
             var paginatedEntities = await _shoppingListService.GetAllPaginatedAsync(skip, limit);
 
             string? nextLink = String.Empty;
-            if (limit <= paginatedEntities.MappedEntities.Count())
+            if (limit <= paginatedEntities.Entities.Count())
             {
                 nextLink = Url.Action(nameof(GetPaginatedItems), new { skip = skip + limit, limit });
             }
@@ -48,8 +42,6 @@ namespace LabWeb.Controllers
             return paginatedEntities;
         }
 
-
-        // GET: api/ShoppingLists/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ShoppingListResponse>> GetShoppingList(Guid id)
         {
@@ -63,10 +55,6 @@ namespace LabWeb.Controllers
             return shoppingList;
         }
 
-
-
-        // PUT: api/ShoppingLists/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutShoppingList(Guid id, ShoppingListResponse shoppingList)
         {
@@ -95,8 +83,6 @@ namespace LabWeb.Controllers
             return NoContent();
         }
 
-        // POST: api/ShoppingLists
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<ShoppingListResponse>> PostShoppingList(ShoppingListRequest shoppingList)
         {
@@ -105,7 +91,6 @@ namespace LabWeb.Controllers
             return CreatedAtAction("GetShoppingList", new { id = shoppingListDto.Id }, shoppingListDto);
         }
 
-        // DELETE: api/ShoppingLists/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteShoppingList(Guid id)
         {
@@ -119,7 +104,6 @@ namespace LabWeb.Controllers
 
             return NoContent();
         }
-
         private async Task<bool> ShoppingListExists(Guid id)
         {
             return await _shoppingListService.FindByIdAsync(id) != null;

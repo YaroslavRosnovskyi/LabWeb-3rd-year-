@@ -140,9 +140,15 @@ public abstract class GenericRepository<TEntity>
         if (entity is null)
             throw new ArgumentNullException(nameof(entity));
 
-        var entry = _context.Entry(entity);
-        entry.State = EntityState.Deleted;
-        dbSet.Remove(entity);
+        var trackedEntity = dbSet.Find(entity.Id);
+        if (trackedEntity != null)
+        {
+            dbSet.Remove(trackedEntity);
+        }
+        else
+        {
+            dbSet.Remove(entity);
+        }
     }
 
     public virtual void DeleteAll(IEnumerable<TEntity> entities)

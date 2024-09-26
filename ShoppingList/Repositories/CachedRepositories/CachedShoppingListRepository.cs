@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using LabWeb.Context;
 using LabWeb.Models.Entities;
 using LabWeb.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore.Query;
@@ -19,6 +20,8 @@ public class CachedShoppingListRepository : IShoppingListRepository
 
     public void Delete(ShoppingList entity)
     {
+
+
         string key = $"member-{entity.Id}";
 
         _decorated.Delete(entity);

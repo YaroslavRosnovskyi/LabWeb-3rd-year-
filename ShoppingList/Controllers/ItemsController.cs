@@ -26,12 +26,6 @@ namespace LabWeb.Controllers
             _elasticService = elasticService;
         }
 
-        // GET: api/Items
-        //[HttpGet]
-        //public async Task<ActionResult<IEnumerable<ItemDto>>> GetItems()
-        //{
-        //    return await _itemService.GetAllAsync();
-        //}
         [HttpGet("search")]
         public async Task<ActionResult<List<ItemResponse>>> SearchItems([FromQuery] string query, [FromQuery] int skip = 0, [FromQuery] int limit = 10)
         {
@@ -45,7 +39,6 @@ namespace LabWeb.Controllers
             return Ok(items);
         }
 
-
         [HttpPost("create-index")]
         public async Task<IActionResult> CreateIndex(string indexName)
         {
@@ -53,7 +46,7 @@ namespace LabWeb.Controllers
             return Ok($"Index {indexName} was created");
         }
 
-        [HttpPost("delete-index")]
+        [HttpDelete("delete-index")]
         public async Task<IActionResult> DeleteIndex(string indexName)
         {
             await _elasticService.DeleteIndexIfExists(indexName);
@@ -65,10 +58,10 @@ namespace LabWeb.Controllers
         {
             var paginatedEntities = await _itemService.GetAllPaginatedAsync(skip, limit);
 
-            await _elasticService.AddOrUpdateBulk(paginatedEntities.MappedEntities, "items");
+            await _elasticService.AddOrUpdateBulk(paginatedEntities.Entities, "items");
 
             string? nextLink = String.Empty;
-            if (limit <= paginatedEntities.MappedEntities.Count())
+            if (limit < paginatedEntities.Entities.Count())
             {
                 nextLink = Url.Action(nameof(GetPaginatedItems), new { skip = skip + limit, limit });
             }
@@ -78,7 +71,6 @@ namespace LabWeb.Controllers
             return paginatedEntities;
         }
 
-        // GET: api/Items/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ItemResponse>> GetItem(Guid id)
         {
@@ -92,8 +84,6 @@ namespace LabWeb.Controllers
             return item;
         }
 
-        // PUT: api/Items/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutItem(Guid id, ItemResponse item)
         {
@@ -122,8 +112,6 @@ namespace LabWeb.Controllers
             return NoContent();
         }
 
-        // POST: api/Items
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<ItemResponse>> PostItem(ItemRequest item)
         {
@@ -138,7 +126,6 @@ namespace LabWeb.Controllers
             return CreatedAtAction("GetItem", new { id = newItem.Id }, newItem);
         }
 
-        // DELETE: api/Items/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteItem(Guid id)
         {
