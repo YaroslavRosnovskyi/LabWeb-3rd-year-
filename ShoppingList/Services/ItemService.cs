@@ -13,13 +13,9 @@ namespace LabWeb.Services;
 
 public class ItemService : GenericService<Item, ItemRequest, ItemResponse>, IItemService
 {
-
     public ItemService(IItemRepository itemRepository) : base(itemRepository)
     {
         
     }
-
-
-    
 
 }
