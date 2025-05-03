@@ -191,5 +191,37 @@ namespace LabWeb.Tests.Services
             var act = async () => await _service.Update(entityDto);
             await act.Should().ThrowAsync<Exception>().WithMessage("Save failed");
         }
+
+        [Fact]
+        public async Task FindByIdAsync_ShouldReturnDifferentResultsOnConsecutiveCalls()
+        {
+            // Arrange
+            var id = Guid.NewGuid();
+            var firstEntity = new Item { Id = id, Name = "FirstItem", Quantity = 1 };
+            var secondEntity = new Item { Id = id, Name = "SecondItem", Quantity = 2 };
+
+            _repoMock.SetupSequence(x => x.GetByIdAsync(id))
+                .ReturnsAsync(firstEntity)
+                .ReturnsAsync(secondEntity)
+                .ReturnsAsync((Item?)null);
+
+            // Act
+            var result1 = await _service.FindByIdAsync(id);
+            var result2 = await _service.FindByIdAsync(id);
+            var result3 = await _service.FindByIdAsync(id);
+
+            // Assert
+            result1.Should().NotBeNull();
+            result1!.Name.Should().Be("FirstItem");
+            result1.Quantity.Should().Be(1);
+
+            result2.Should().NotBeNull();
+            result2!.Name.Should().Be("SecondItem");
+            result2.Quantity.Should().Be(2);
+
+            result3.Should().BeNull();
+
+            _repoMock.Verify(x => x.GetByIdAsync(id), Times.Exactly(3));
+        }
     }
 }

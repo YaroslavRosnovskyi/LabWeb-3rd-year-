@@ -97,4 +97,34 @@ public class ShoppingListServiceTests
         result.Should().Contain(x => x.Name == "Groceries");
         result.Should().Contain(x => x.Name == "Clothing");
     }
+
+    [Fact]
+    public async Task FindByIdAsync_ShouldReturnDifferentResultsOnConsecutiveCalls()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var firstEntity = new ShoppingList { Id = id, Name = "FirstList" };
+        var secondEntity = new ShoppingList { Id = id, Name = "SecondList" };
+
+        _mockRepository.SetupSequence(x => x.GetByIdAsync(id))
+            .ReturnsAsync(firstEntity)
+            .ReturnsAsync(secondEntity)
+            .ReturnsAsync((ShoppingList?)null);
+
+        // Act
+        var result1 = await _shoppingListService.FindByIdAsync(id);
+        var result2 = await _shoppingListService.FindByIdAsync(id);
+        var result3 = await _shoppingListService.FindByIdAsync(id);
+
+        // Assert
+        result1.Should().NotBeNull();
+        result1!.Name.Should().Be("FirstList");
+
+        result2.Should().NotBeNull();
+        result2!.Name.Should().Be("SecondList");
+
+        result3.Should().BeNull();
+
+        _mockRepository.Verify(x => x.GetByIdAsync(id), Times.Exactly(3));
+    }
 }
