@@ -127,4 +127,78 @@ public class ShoppingListServiceTests
 
         _mockRepository.Verify(x => x.GetByIdAsync(id), Times.Exactly(3));
     }
+
+    [Fact]
+    public void ShoppingListComplexMockScenarios_Test()
+    {
+        // Arrange
+        var userId1 = Guid.NewGuid();
+        var userId2 = Guid.NewGuid();
+        var userId3 = Guid.NewGuid();
+
+        var mockSequence = new MockSequence();
+
+        _mockRepository.Setup(repo => repo.GetWhere(
+                It.Is<Expression<Func<ShoppingList, bool>>>(expr =>
+                    ExpressionContainsValue(expr, userId1)), null, false))
+            .Returns(new List<ShoppingList>
+            {
+                new ShoppingList { Id = Guid.NewGuid(), Name = "User1List", UserId = userId1 }
+            }.AsQueryable());
+
+        _mockRepository.Setup(repo => repo.GetWhere(
+                It.Is<Expression<Func<ShoppingList, bool>>>(expr =>
+                    ExpressionContainsValue(expr, userId2)), null, false))
+            .Throws(new InvalidOperationException("User is blocked"));
+
+        var setupSequence = _mockRepository.SetupSequence(repo => repo.GetWhere(
+            It.Is<Expression<Func<ShoppingList, bool>>>(expr =>
+                ExpressionContainsValue(expr, userId3)), null, false));
+
+        setupSequence.Returns(new List<ShoppingList>().AsQueryable());
+        setupSequence.Returns(new List<ShoppingList>
+        {
+            new ShoppingList { Id = Guid.NewGuid(), Name = "FirstCall", UserId = userId3 }
+        }.AsQueryable());
+        setupSequence.Returns(new List<ShoppingList>
+        {
+            new ShoppingList { Id = Guid.NewGuid(), Name = "SecondCall", UserId = userId3 },
+            new ShoppingList { Id = Guid.NewGuid(), Name = "ThirdCall", UserId = userId3 }
+        }.AsQueryable());
+
+        _mockRepository.Setup(repo => repo.SaveChangesAsync())
+            .Returns(Task.CompletedTask)
+            .Verifiable();
+
+        _mockRepository.Setup(repo => repo.Post(It.IsAny<ShoppingList>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable();
+
+        var result1 = _shoppingListService.GetShoppingListByUserId(userId1);
+        result1.Should().HaveCount(1);
+        result1.First().Name.Should().Be("User1List");
+
+        Func<Task> act = async () => _shoppingListService.GetShoppingListByUserId(userId2);
+        act.Should().ThrowAsync<InvalidOperationException>().WithMessage("User is blocked");
+
+        var result3First = _shoppingListService.GetShoppingListByUserId(userId3);
+        result3First.Should().BeEmpty();
+
+        var result3Second = _shoppingListService.GetShoppingListByUserId(userId3);
+        result3Second.Should().HaveCount(1);
+        result3Second.First().Name.Should().Be("FirstCall");
+        var result3Third = _shoppingListService.GetShoppingListByUserId(userId3);
+        result3Third.Should().HaveCount(2);
+        result3Third.Should().Contain(x => x.Name == "SecondCall");
+        result3Third.Should().Contain(x => x.Name == "ThirdCall");
+
+        _mockRepository.Verify(repo => repo.GetWhere(It.IsAny<Expression<Func<ShoppingList, bool>>>(), null, false), Times.Exactly(5));
+
+        _mockRepository.VerifyAll();
+    }
+
+    private bool ExpressionContainsValue(Expression<Func<ShoppingList, bool>> expression, Guid value)
+    {
+        return expression.ToString().Contains(value.ToString());
+    }
 }
