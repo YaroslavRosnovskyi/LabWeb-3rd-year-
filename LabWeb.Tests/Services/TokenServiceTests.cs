@@ -128,5 +128,41 @@ namespace LabWeb.Tests.Services
             else
                 imageClaim.Should().Be("Default.jpg");
         }
+
+        [Fact]
+        public async Task GenerateJwtTokenAsync_ShouldUseDifferentImageUrlsOnConsecutiveCalls()
+        {
+            // Arrange
+            var user = new ApplicationUser
+            {
+                Id = Guid.NewGuid(),
+                UserName = "TestUser",
+                ImageName = "varying_image.png"
+            };
+
+            _blobStorageServiceMock.SetupSequence(x => x.GetBlobUrl(user.ImageName))
+                .ReturnsAsync("https://blobstorage/image1.png")
+                .ReturnsAsync("https://blobstorage/image2.png")
+                .ReturnsAsync((string?)null);
+
+            // Act
+            var token1 = await _tokenService.GenerateJwtTokenAsync(user);
+            var token2 = await _tokenService.GenerateJwtTokenAsync(user);
+            var token3 = await _tokenService.GenerateJwtTokenAsync(user);
+
+            // Assert
+            var handler = new JwtSecurityTokenHandler();
+
+            var jwt1 = handler.ReadJwtToken(token1);
+            jwt1.Claims.Should().Contain(c => c.Type == "ImageName" && c.Value == "https://blobstorage/image1.png");
+
+            var jwt2 = handler.ReadJwtToken(token2);
+            jwt2.Claims.Should().Contain(c => c.Type == "ImageName" && c.Value == "https://blobstorage/image2.png");
+
+            var jwt3 = handler.ReadJwtToken(token3);
+            jwt3.Claims.Should().Contain(c => c.Type == "ImageName" && c.Value == "Default.jpg");
+
+            _blobStorageServiceMock.Verify(x => x.GetBlobUrl(user.ImageName), Times.Exactly(3));
+        }
     }
 }
